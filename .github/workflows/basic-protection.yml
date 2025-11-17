@@ -1,0 +1,39 @@
+name: Basic Protection
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # 1. Block direct pushes to main
+      - name: Block direct push to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "You cannot push directly to main. Create a Pull Request."
+          exit 1
+
+      # 2. Detect force pushes (rewritten history)
+      - name: Block force pushes
+        run: |
+          BEFORE=${{ github.event.before }}
+          AFTER=${{ github.sha }}
+          if [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            if ! git merge-base --is-ancestor "$BEFORE" "$AFTER"; then
+              echo "Force push detected — not allowed."
+              exit 1
+            fi
+          fi
+
+      # 3. Prevent branch deletion
+      - name: Prevent branch deletion
+        if: github.event.after == '0000000000000000000000000000000000000000'
+        run: |
+          echo "Branch deletion is forbidden."
+          exit 1
