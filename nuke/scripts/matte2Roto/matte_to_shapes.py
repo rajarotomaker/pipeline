@@ -1,3 +1,5 @@
+#Currently this version only works with png
+print("check point")
 import nuke
 import nuke.rotopaint as rp
 import cv2
@@ -133,15 +135,21 @@ def matte_to_shapes_animated_from_sequence():
             continue
 
         # --- Adaptive contour sampling for smoother shapes ---
-        epsilon = 0.25 if MAX_DETAIL else 0.5
+        epsilon = 2.0 if MAX_DETAIL else 1.0
         approx = cv2.approxPolyDP(cnt, epsilon, True)
         pts = approx.reshape(-1, 2)
 
+        #compute perimeter of simplified contour
         perimeter = cv2.arcLength(approx, True)
-        if MAX_DETAIL:
-            target_points = int(np.clip(perimeter / 2.0, 200, 800))
-        else:
-            target_points = int(np.clip(perimeter / 4.0, 120, 600))
+
+        #commenting out max_detail logic
+        # if MAX_DETAIL:
+        #     target_points = int(np.clip(perimeter / 5.0, 100, 150))
+        # else:
+        #     target_points = int(np.clip(perimeter / 8.0, 60, 120))
+
+        target_points = int(np.clip(perimeter / 5.0, 100, 150))
+
 
         pts = resample(np.expand_dims(pts, axis=1), target_points)
         pts = pts.reshape(-1, 2)
@@ -166,6 +174,7 @@ def matte_to_shapes_animated_from_sequence():
             pass
 
         layer.append(shape)
+        print("Shape", shape.name, "point", len(shape)) #debug statement to print points
         shapes.append((shape, pts.copy()))
 
     # --- Stabilize contour data to avoid shape mismatch ---
@@ -196,5 +205,7 @@ def matte_to_shapes_animated_from_sequence():
     nuke.message("✅ Animated roto created successfully from matte sequence ✅")
 
 
-# Run
-matte_to_shapes_animated_from_sequence()
+def run():
+    matte_to_shapes_animated_from_sequence()
+
+run()

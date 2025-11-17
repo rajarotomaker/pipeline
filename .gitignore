@@ -1,0 +1,18 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Nuke
+*.nk.autosave
+*.tmp
+
+# Logs
+logs/
+*.log
+
+# Env files
+.env

@@ -9,5 +9,3 @@ pip           25.2
 
 This commmand:
 "C:\Program Files\Nuke16.0v4\python.exe" -m pip install numpy opencv-python
-
-
